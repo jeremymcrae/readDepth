@@ -34,7 +34,7 @@ def check_access(pwd_path=None):
     '''
     
     # don't re-authenticate if we already have access
-    klist = subprocess.Popen(["klist"], stderr=subprocess.PIPE,
+    klist = subprocess.Popen(['klist' ,'-s'], stderr=subprocess.PIPE,
         stdout=subprocess.PIPE)
     if not klist.stderr.read().startswith('klist: No credentials'):
         return
@@ -51,7 +51,7 @@ def check_access(pwd_path=None):
     stdout = kinit.communicate(input=pwd)
 
 def get_bam_slice(bam_path, slice_bam, regions):
-    """ extract a section of a BAM file from IRODS, or lustre.
+    ''' extract a section of a BAM file from IRODS, or lustre.
     
     It can be much quicker extract a small slice of a BAM from IRODS, or to
     iterate through a small slice of a BAM.
@@ -62,15 +62,21 @@ def get_bam_slice(bam_path, slice_bam, regions):
             BAM slice.
         regions: list of (chrom, start, end) tuples for the regions to be
             extracted.
-    """
+    '''
     
     # format the list of variant regions for samtools
-    regions = ["{0}:{1}-{2}".format(x[0], x[1], x[2]) for x in regions]
+    regions = ['{0}:{1}-{2}'.format(x[0], x[1], x[2]) for x in regions]
     
     # get the slice of the BAM
-    temp = tempfile.NamedTemporaryFile(mode="w")
-    command = [SAMTOOLS, "view", "-b", bam_path] + regions
-    code = subprocess.check_call(command, stdout=temp, stderr=open(os.devnull, "w"))
+    temp = tempfile.NamedTemporaryFile(mode='w')
+    command = [SAMTOOLS, 'view', '-b', bam_path] + regions
+    p = subprocess.Popen(command, stdout=temp, stderr=subprocess.PIPE)
+    (outs, errs) = p.communicate()
+    print(p.returncode, outs, errs)
+    
+    if p.returncode == 1:
+        if errs != '[main_samview] random alignment retrieval only works for indexed BAM or CRAM files.':
+            raise subprocess.CalledProcessError
     
     if type(slice_bam) == str:
         slice_bam = open(slice_bam, 'wb')
@@ -83,6 +89,6 @@ def get_bam_slice(bam_path, slice_bam, regions):
     # corresponding bam index to the working directory. Since we have generated
     # an index file with pysam (in the matching directory to the temporary bam
     # slice), we can delete the extracted BAM index file.
-    index = os.path.basename(bam_path.replace("irods://", "")) + ".bai"
+    index = os.path.basename(bam_path.replace('irods://', '')) + '.bai'
     if os.path.exists(index):
         os.remove(index)
