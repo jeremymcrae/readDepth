@@ -34,9 +34,9 @@ def check_access(pwd_path=None):
     '''
     
     # don't re-authenticate if we already have access
-    klist = subprocess.Popen(['klist' ,'-s'], stderr=subprocess.PIPE,
+    code = subprocess.call(['klist' ,'-s'], stderr=subprocess.PIPE,
         stdout=subprocess.PIPE)
-    if not klist.stderr.read().startswith('klist: No credentials'):
+    if code == 0:
         return
     
     # you can either store the password in file (but make sure the file isn't
@@ -76,7 +76,7 @@ def get_bam_slice(bam_path, slice_bam, regions):
     
     if p.returncode == 1:
         if errs != '[main_samview] random alignment retrieval only works for indexed BAM or CRAM files.':
-            raise subprocess.CalledProcessError
+            raise subprocess.CalledProcessError(p.returncode, command, errs)
     
     if type(slice_bam) == str:
         slice_bam = open(slice_bam, 'wb')
