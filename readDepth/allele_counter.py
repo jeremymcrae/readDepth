@@ -145,7 +145,7 @@ class AlleleCounter(object):
                 allele = 'ref'
             elif read.indel == indel_length:
                 allele = 'alt'
-        else:
+        elif read.query_position is not None:
             # if the variant is for a SNV, get the base call as a string
             seq = read.alignment.query_sequence[read.query_position:read.query_position + length]
             if seq == ref:
