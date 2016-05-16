@@ -25,18 +25,18 @@ import pysam
 
 class AlleleCounter(object):
     
-    def __init__(self, bam_path, max_coverage=1e10, min_qual=0, map_qual=0, by_strand=False):
+    def __init__(self, bam, max_coverage=1e10, min_qual=0, map_qual=0, by_strand=False):
         ''' counts reads with different base calls at a chrom position
         
         Args:
-            bam_path: path to indexed bam file
+            bam: path or filehandle handle for indexed bam file
             max_coverage: maximum coverage at which we stop tallying the bases
             min_qual: minimum quality score required to include the base call
             by_strand: whether to separate the ref and alt counts by forward and
                 reverse reads.
         '''
         
-        self.bam = pysam.AlignmentFile(bam_path)
+        self.bam = pysam.AlignmentFile(bam)
         self.max_coverage = max_coverage
         self.min_qual = min_qual
         self.min_map_qual = map_qual
