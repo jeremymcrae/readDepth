@@ -22,7 +22,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 import os
 import subprocess
 import tempfile
-import shutil
 from getpass import getpass
 
 import pysam
@@ -58,11 +57,14 @@ def get_bam_slice(bam_path, slice_bam, regions):
     
     Args:
         bam_path: path to BAM on IRODS, or lustre
-        temp_bam: file handle for storing the BAM slice, or path to store the
+        slice_bam: file handle for storing the BAM slice, or path to store the
             BAM slice.
         regions: list of (chrom, start, end) tuples for the regions to be
             extracted.
     '''
+    
+    # sort the regions before accessing IRODS. This could improve access times?
+    regions = sorted(regions)
     
     # format the list of variant regions for samtools
     regions = ['{0}:{1}-{2}'.format(x[0], x[1], x[2]) for x in regions]
@@ -72,14 +74,15 @@ def get_bam_slice(bam_path, slice_bam, regions):
     command = [SAMTOOLS, 'view', '-b', bam_path] + regions
     p = subprocess.Popen(command, stdout=temp, stderr=subprocess.PIPE)
     (outs, errs) = p.communicate()
-    print(p.returncode, outs, errs)
     
     if p.returncode == 1:
         if errs != '[main_samview] random alignment retrieval only works for indexed BAM or CRAM files.':
             raise subprocess.CalledProcessError(p.returncode, command, errs)
     
-    if type(slice_bam) == str:
+    try:
         slice_bam = open(slice_bam, 'wb')
+    except TypeError:
+        pass
     
     slice_bam.write(pysam.sort(temp.name))
     slice_bam.flush()
