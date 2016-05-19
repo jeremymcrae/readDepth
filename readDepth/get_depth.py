@@ -23,6 +23,7 @@ from __future__ import print_function
 
 import os
 import tempfile
+import time
 
 from readDepth.get_slice import get_bam_slice, check_access
 from readDepth.extract_bam import extract_bam_from_irods
@@ -72,7 +73,7 @@ def get_read_depths(bam_path, variants, min_quality=0, map_quality=30,
                     'alt': {'forward': None, 'reverse': None}}
     
     if store_bam is None:
-        # if we are using a temporary file, we also need to clean up the bam 
+        # if we are using a temporary file, we also need to clean up the bam
         # index file
         os.remove(bam_writer.name + '.bai')
     
