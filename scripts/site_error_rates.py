@@ -141,6 +141,7 @@ def main():
     except TypeError:
         pass
     
+    include_header = True
     for i, row in subset.iterrows():
         person_id = row['individual_id']
         bam_path = get_bam_path(bams, person_id)
@@ -150,8 +151,8 @@ def main():
         except ValueError:
             continue
         
-        include_header = i == 0
         save_depths(depths, person_id, args.output, args.compress, include_header)
+        include_header = False
 
 if __name__ == '__main__':
     main()
