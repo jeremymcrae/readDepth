@@ -30,6 +30,11 @@ setup(
     license = 'MIT',
     packages=['readDepth'],
     install_requires=['pysam >= 0.8.1',
+                      'numpy',
+                      'scipy',
+                      'matplotlib',
+                      'pandas',
+                      'seaborn',
     ],
     classifiers=[
         'Development Status :: 3 - Alpha',
