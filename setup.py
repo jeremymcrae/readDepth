@@ -31,7 +31,7 @@ setup(
     packages=['readDepth'],
     install_requires=['pysam >= 0.8.1',
                       'numpy',
-                      'scipy >= 0.12.0',
+                      'scipy > 0.9.0',
                       'matplotlib',
                       'pandas',
                       'seaborn',
