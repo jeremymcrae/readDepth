@@ -35,6 +35,7 @@ setup(
                       'matplotlib',
                       'pandas',
                       'seaborn',
+                      'denovoFilter',
     ],
     classifiers=[
         'Development Status :: 3 - Alpha',
