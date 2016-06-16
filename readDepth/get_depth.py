@@ -66,7 +66,7 @@ def get_read_depths(bam_path, variants, min_quality=0, map_quality=30,
                 counts[variant] = {'ref': {'forward': None, 'reverse': None},
                     'alt': {'forward': None, 'reverse': None}}
     
-    if store_bam is None:
+    if store_bam is None and bam_path.startswith('irods'):
         # if we are using a temporary file, we also need to clean up the bam
         # index file
         os.remove(bam_writer.name + '.bai')
