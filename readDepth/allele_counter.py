@@ -36,7 +36,11 @@ class AlleleCounter(object):
                 reverse reads.
         '''
         
-        self.bam = pysam.AlignmentFile(bam)
+        try:
+            self.bam = pysam.AlignmentFile(bam)
+        except TypeError:
+            self.bam = pysam.AlignmentFile(bam.name)
+        
         self.max_coverage = max_coverage
         self.min_qual = min_qual
         self.min_map_qual = map_qual
