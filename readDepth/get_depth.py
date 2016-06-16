@@ -100,5 +100,3 @@ def get_bam_from_irods(path, variants, store_bam=None):
         get_full_bam(bam_path, bam_writer)
     
     return bam_writer
-    
-    
