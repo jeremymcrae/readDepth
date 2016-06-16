@@ -26,7 +26,7 @@ import tempfile
 import time
 
 from readDepth.get_slice import get_bam_slice, check_access
-from readDepth.extract_bam import extract_bam_from_irods
+from readDepth.extract_bam import get_full_bam
 from readDepth.allele_counter import AlleleCounter
 
 def get_read_depths(bam_path, variants, min_quality=0, map_quality=30,
@@ -35,30 +35,24 @@ def get_read_depths(bam_path, variants, min_quality=0, map_quality=30,
     
     Args:
         bam_path: path to BAM file (can be on a standard filesystem (e.g.
-        /lustre/scratch114/projects/ddd/release-main_fy3/20140916/sample_improved_bams_hgi_2/DDD_MAIN5605962.bam,
-        or on an IRODS filesystem e.g. irods:///humgen/projects/ddd/20150316/1866STDY5139786.bam)
-        variants: list of (chromosome, start position, end position) tuples.
+            /path/to/bam, or on IRODS e.g. irods:///path/to/ddd/bam)
+        variants: list of (chrom, start, end, ref, alt) tuples.
+        min_quality: threshold for minimum base quality to include bases in the
+            counts. Defaults to zero, ie includes all reads.
+        map_quality: threshold for mapping quality. Defaults to 30.
+        by_strand: whether to return read depths by strand.
+        store_bam: path to store bam, or None. This can be useful if you are
+            looking at a bam on IRODS.
     
     Returns:
         list of dictionaries of allele depths by base.
     '''
     
-    pwd_path = os.path.expanduser('~/.kinit')
-    check_access(pwd_path)
-    
-    try:
-        bam_writer = open(store_bam, 'w+b')
-    except TypeError:
-        bam_writer = tempfile.NamedTemporaryFile(mode='w+b')
-    
-    # if we need to extract many sites, then that can slow down processing
-    if len(variants) < 10000:
-        get_bam_slice(bam_path, bam_writer, variants)
+    if bam_path.startswith('irods'):
+        bam_writer = get_bam_from_irods(path, variants, store_bam)
+        bam_reader = open(bam_writer.name, 'r')
     else:
-        extract_bam_from_irods(bam_path, bam_writer)
-    
-    # open the bam as read-only, since pysam requires read-only file handles.
-    bam_reader = open(bam_writer.name, 'r')
+        bam_reader = open(bam_path, 'r')
     
     counts = {}
     counter = AlleleCounter(bam_reader, min_qual=min_quality, map_qual=map_quality,
@@ -78,3 +72,33 @@ def get_read_depths(bam_path, variants, min_quality=0, map_quality=30,
         os.remove(bam_writer.name + '.bai')
     
     return counts
+
+def get_bam_from_irods(path, variants, store_bam=None):
+    ''' pull a bam from IRODS
+    
+    Args:
+        bam_path: path to BAM file on IRODS e.g. irods:///path/to/bam)
+        variants: list of (chromosome, start, end, ref, alt) tuples.
+        store_bam: path to store bam.
+    
+    Returns:
+        list of dictionaries of allele depths by base.
+    '''
+    
+    pwd_path = os.path.expanduser('~/.kinit')
+    check_access(pwd_path)
+    
+    try:
+        bam_writer = open(store_bam, 'w+b')
+    except TypeError:
+        bam_writer = tempfile.NamedTemporaryFile(mode='w+b')
+    
+    # if we need to extract many sites, then that can slow down processing
+    if len(variants) < 10000:
+        get_bam_slice(bam_path, bam_writer, variants)
+    else:
+        get_full_bam(bam_path, bam_writer)
+    
+    return bam_writer
+    
+    

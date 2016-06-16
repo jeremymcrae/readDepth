@@ -21,7 +21,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import subprocess
 
-def extract_bam_from_irods(bam, outpath):
+def get_full_bam(bam, outpath):
     ''' extracts BAM and BAI files for a participant from IRODS
     
     Args:
@@ -39,7 +39,7 @@ def extract_bam_from_irods(bam, outpath):
     
     bai = bam + '.bai'
     
-    # if we have passed in a file handle for the destination, get the 
+    # if we have passed in a file handle for the destination, get the
     # corresponding path.
     try:
         outpath = outpath.name
