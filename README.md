@@ -1,6 +1,4 @@
-### readDepth: de novo mutation recurrence significance testing
-program to calculate the significance of seeing N DNMs of a specific
-combination of functional types in a particular gene in M trios
+### readDepth
 
 #### Install
 ```sh
