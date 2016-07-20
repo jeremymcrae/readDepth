@@ -49,7 +49,7 @@ def get_read_depths(bam_path, variants, min_quality=0, map_quality=30,
     '''
     
     if bam_path.startswith('irods'):
-        bam_writer = get_bam_from_irods(path, variants, store_bam)
+        bam_writer = get_bam_from_irods(bam_path, variants, store_bam)
         bam_reader = open(bam_writer.name, 'r')
     else:
         bam_reader = open(bam_path, 'r')
@@ -95,8 +95,8 @@ def get_bam_from_irods(path, variants, store_bam=None):
     
     # if we need to extract many sites, then that can slow down processing
     if len(variants) < 10000:
-        get_bam_slice(bam_path, bam_writer, variants)
+        get_bam_slice(path, bam_writer, variants)
     else:
-        get_full_bam(bam_path, bam_writer)
+        get_full_bam(path, bam_writer)
     
     return bam_writer
