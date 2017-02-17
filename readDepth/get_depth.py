@@ -30,7 +30,7 @@ from readDepth.extract_bam import get_full_bam
 from readDepth.allele_counter import AlleleCounter
 
 def get_read_depths(bam_path, variants, min_quality=0, map_quality=30,
-        by_strand=True, store_bam=None):
+        by_strand=True, store_bam=None, stepper=None):
     ''' get the read depths of the alleles at variable sites
     
     Args:
@@ -59,7 +59,7 @@ def get_read_depths(bam_path, variants, min_quality=0, map_quality=30,
         by_strand=by_strand)
     for variant in variants:
         try:
-            counts[variant] = counter.check_variant(*variant)
+            counts[variant] = counter.check_variant(*variant, stepper=stepper)
         except AssertionError:
             counts[variant] = {'ref': None, 'alt': None}
             if by_strand:

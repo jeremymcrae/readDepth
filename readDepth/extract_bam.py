@@ -49,7 +49,7 @@ def get_full_bam(bam, outpath):
     outbai = outpath + '.bai'
     
     # and pull the BAM and BAI files out of IRODs, so that we can work on them
-    subprocess.call(['iget', '-f', '-v', '-X', '-K', '--retries', '3', bam, outpath],
+    subprocess.check_call(['iget', '-f', '-v', '-X', outpath, '-K', '--retries', '3', bam, outpath],
         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    subprocess.call(['iget', '-f', '-v', '-X', '-K', '--retries', '3', bai, outbai],
+    subprocess.check_call(['iget', '-f', '-v', '-X', outbai, '-K', '--retries', '3', bai, outbai],
         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
