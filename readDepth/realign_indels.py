@@ -73,7 +73,7 @@ def sort_regions(regions):
     
     return sorted(regions, key=lambda x: (chroms[x[0]], x[1]))
 
-def make_indel_vcf(vcf_path, regions, outfile):
+def make_indel_vcf(regions, outfile):
     ''' prepare a vcf containing the indels at selected sites
     
     Args:
@@ -138,7 +138,7 @@ def make_targets(regions, handle, window=50):
     
     handle.flush()
 
-def realign_indels(vcf, regions, inbam, outbam, java=JAVA_BIN, java_opts=OPTS,
+def realign_indels(regions, inbam, outbam, java=JAVA_BIN, java_opts=OPTS,
         gatk=GATK, ref_genome=GENOME):
     ''' create bam realigned around specific indels
     
@@ -165,7 +165,7 @@ def realign_indels(vcf, regions, inbam, outbam, java=JAVA_BIN, java_opts=OPTS,
     
     # prepare the input files for indel realignment
     make_indel_bam(inbam, regions, region_bam)
-    make_indel_vcf(vcf, regions, region_vcf)
+    make_indel_vcf(regions, region_vcf)
     make_targets(regions, targets)
     
     realigner = [java] + java_opts + [
