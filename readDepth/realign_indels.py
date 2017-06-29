@@ -78,17 +78,19 @@ def make_indel_vcf(vcf_path, regions, outfile):
     
     Args:
         vcf_path: path to source VCF
-        regions: list of (chrom, position) tuples for required indels
+        regions: list of (chrom, position, end, ref, alt) tuples for required indels
         outfile: handle for output VCF
     '''
     
-    vcf = pysam.VariantFile(vcf_path)
-    new_vcf = pysam.VariantFile(outfile.name, mode='w', header=vcf.header)
+    # write minimal VCF header
+    outfile.write('##fileformat=VCFv4.2\n'.encode('utf8'))
+    outfile.write('#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tperson_id\n'.encode('utf8'))
     
-    for region in sort_regions(regions):
-        for record in vcf.fetch(region[0], region[1] - 1, region[1]):
-            if record.pos == region[1]:
-                new_vcf.write(record)
+    for chrom, pos, end, ref, alt in regions:
+        line = '{}\t{}\t.\t{}\t{}\t.\t.\t.\t.\t.\n'.format(chrom, pos, ref, alt)
+        outfile.write(line.encode('utf8'))
+    
+    outfile.flush()
 
 def make_indel_bam(bam_path, regions, outfile, window=100):
     ''' create a bam for the reads surrounding the required indel regions.
@@ -131,11 +133,9 @@ def make_targets(regions, handle, window=50):
     '''
     
     for region in sort_regions(regions):
-        chrom = region[0]
-        pos = region[1]
-        
+        chrom, pos = region[0], region[1]
         handle.write('{}:{}-{}\n'.format(chrom, pos - window, pos + window).encode('utf8'))
-
+    
     handle.flush()
 
 def realign_indels(vcf, regions, inbam, outbam, java=JAVA_BIN, java_opts=OPTS,
@@ -147,7 +147,7 @@ def realign_indels(vcf, regions, inbam, outbam, java=JAVA_BIN, java_opts=OPTS,
     
     Args:
         vcf: path to source VCf
-        regions: list of (chrom, position) tuples for required indels
+        regions: list of (chrom, position, end, ref, alt) tuples for required indels
         inbam: path to source bam
         outbam: path to write realigned bam to
         java: path to java binary
