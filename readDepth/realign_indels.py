@@ -174,6 +174,7 @@ def realign_indels(regions, inbam, outbam, java=JAVA_BIN, java_opts=OPTS,
         '-R', ref_genome,
         '-known', region_vcf.name,
         '--targetIntervals', targets.name,
+        '--maxReadsInMemory', '300000',
         '-I', region_bam.name,
         '-o',  outbam ]
     
