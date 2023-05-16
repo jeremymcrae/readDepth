@@ -19,14 +19,9 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 '''
 
-from __future__ import print_function
-
-import os
-
-import pysam
-
 class AlleleCounter(object):
-    
+    '''
+    '''
     def __init__(self, bam, max_coverage=1e10, min_qual=0, map_qual=0, by_strand=False):
         ''' counts reads with different base calls at a chrom position
         
@@ -38,13 +33,7 @@ class AlleleCounter(object):
                 reverse reads.
         '''
         
-        try:
-            os.path.exists(bam)
-            self.bam = pysam.AlignmentFile(bam)
-        except TypeError:
-            os.path.exists(bam.name)
-            self.bam = pysam.AlignmentFile(bam.name)
-        
+        self.bam = bam
         self.max_coverage = max_coverage
         self.min_qual = min_qual
         self.min_map_qual = map_qual
@@ -53,14 +42,13 @@ class AlleleCounter(object):
         
         self.strands = {False: 'forward', True: 'reverse'}
     
-    def check_variant(self, chrom, start_pos, end_pos=None, ref=None, alt=None, stepper=None):
+    def __call__(self, chrom, pos, ref=None, alt=None, stepper=None):
         ''' counts reads with different base calls at a chrom position
         
         Args:
             chrom: chromosome to use eg 'chr1' or '1' depending on how the BAM is
                 set up (specifically, an ID found in the BAMs sequence dictionary).
-            start_pos: start_base position to count bases at.
-            end_pos: end base position to count bases at, or None if single base SNV.
+            pos: start_base position to count bases at.
             ref: reference allele (e.g. 'T').
             alt: alternate allele (e.g. 'G').
         
@@ -72,12 +60,8 @@ class AlleleCounter(object):
         # alt allele (and vice versa if we don't have the ref allele).
         assert type(ref) == type(alt)
         
-        start_pos = int(start_pos)
-        
-        if end_pos is None:
-            end_pos = start_pos + len(ref) - 1
-        
-        end_pos = int(end_pos)
+        start_pos = int(pos)
+        end_pos = start_pos + len(ref) - 1
         
         alleles = {'ref': 0, 'alt': 0}
         if self.by_strand:
@@ -97,8 +81,7 @@ class AlleleCounter(object):
             start_pos = self.adjust_indel(chrom, start_pos, end_pos, ref, alt, stepper)
             end_pos = start_pos + 1
         
-        pileup = self.bam.pileup(chrom, start_pos - 1, end_pos + 1,
-            truncate=True, stepper=stepper)
+        pileup = self.bam.pileup(chrom, start_pos - 1, end_pos + 1, truncate=True, stepper=stepper)
         # count each base at the required site
         for column in pileup:
             if column.pos != start_pos - 1:
