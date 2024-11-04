@@ -2,7 +2,7 @@
 
 #### Install
 ```sh
-pip install git+git://github.com/jeremymcrae/readDepth.git --user
+pip install git+https://github.com/jeremymcrae/readDepth.git
 
 # Alternatively:
 git clone https://github.com/jeremymcrae/readDepth.git
